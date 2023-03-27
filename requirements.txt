@@ -4,4 +4,3 @@ audio_recorder_streamlit
 gspread
 oauth2client
 stripe
-webbrowser

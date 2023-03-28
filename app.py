@@ -9,8 +9,7 @@ import datetime
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from google.cloud import speech
-import stripe
-import webbrowser
+
 
 import streamlit as st
 from audio_recorder_streamlit import audio_recorder

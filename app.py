@@ -130,8 +130,8 @@ def gmail(email):
 
     message = EmailMessage()
   
-    message['To'] = 'hiroya.tozawa92@gmail.com'
-    message['From'] = email
+    message['To'] = email
+    message['From'] = 'mensetsu.quest.hagukumi@gmail.com'
     message['Subject'] = '面接クエスト 決済URLの送付（テスト）'
     message.set_content('この度は面接クエストをご利用いただきありがとうございます。  \n下記URLより決済を完了させてください。決済確認後にFeedback Sheetを作成させていただきます。 \nhttps://buy.stripe.com/test_14k28W8L71FH4PS28b')
 

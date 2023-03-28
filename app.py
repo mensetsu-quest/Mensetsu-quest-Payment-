@@ -9,7 +9,8 @@ import datetime
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from google.cloud import speech
-
+import stripe
+import webbrowser
 
 import streamlit as st
 from audio_recorder_streamlit import audio_recorder
@@ -103,7 +104,7 @@ def countdown_answer():
 
         time.sleep(1)
         if secs == 1:
-            text_timeout = "時間切れです。リロードして再挑戦してください"
+            text_timeout = "時間切れです。リロードして再挑戦してください  \n※注意※　timeout前に録音を完了していた場合はそのまま少々お待ちください"
             return text_timeout
 
 def google_spread(list):
@@ -131,7 +132,7 @@ def gmail(email):
     message = EmailMessage()
   
     message['To'] = email
-    message['From'] = 'mensetsu.quest.hagukumi@gmail.com'
+    message['From'] = 'menstsu.quest.hagukumi@gmail.com'
     message['Subject'] = '面接クエスト 決済URLの送付（テスト）'
     message.set_content('この度は面接クエストをご利用いただきありがとうございます。  \n下記URLより決済を完了させてください。決済確認後にFeedback Sheetを作成させていただきます。 \nhttps://buy.stripe.com/test_14k28W8L71FH4PS28b')
 
@@ -149,13 +150,16 @@ st.text("① 設問番号を選ぶと設問文が表示されます  \n② 5分�
 if "state" not in st.session_state:
    st.session_state["state"] = 0
 
+if "state_start" not in st.session_state:
+   st.session_state["state_start"] = 0
+
 if st.button("さっそくTry!"):
     st.session_state["state"] = 1
 
 if st.session_state["state"] == 0:
     st.stop()
 
-st.info('問題番号を選ぶと回答が始まります')
+st.info('問題番号を選択してください')
 df_list = pd.read_csv("question_list.csv", header = None)
 option = st.selectbox(
     '問題番号を選択してください',
@@ -164,10 +168,15 @@ question = ""
 if option is not df_list[0][0]:
     question = df_list[df_list[0]==option].iloc[0,1]
 
-if question == "":
+if question is not "":
+    st.success('■ 設問：　' + question)
+
+    if st.button('検討を開始する'):
+        st.session_state["state_start"] = 1
+
+if st.session_state["state_start"] == 0:
     st.stop()
 
-st.success('■ 設問：　' + question)
 
 if st.session_state["state"] == 1:
     st.session_state["state"] = countdown()
@@ -176,8 +185,9 @@ contents = recorder()
 
 if contents == None:
     st.info('①　アイコンボタンを押して回答録音　(アイコンが赤色で録音中)。  \n②　もう一度押して回答終了　(再度アイコンが黒色になれば完了)')
-    contents = countdown_answer()
-    st.info(contents)
+    st.error('録音完了後は10秒程度お待ちください。')
+    timeout_msg = countdown_answer()
+    st.info(timeout_msg)
     st.stop()
 
 st.info('【録音完了！　音声分析中...】  \n　↓分析中は録音データをチェック！')
@@ -198,12 +208,11 @@ status = st.info('分析が完了しました！')
 with st.form("form1"):
     name = st.text_input("名前/Name")
     email = st.text_input("メールアドレス/Mail address")
-    answer = st.text_area("回答内容（修正可能）",text)
     fb_request = st.radio(
         "練習 or 本提出の確認",
-        ("練習用です（Feedbackを希望しない）", "本提出用です（Feedbackを希望する）")
+        ("現役コンサルタントからのFeedbackを希望する（2,000円／決済の案内に遷移します）", "Feedbackを希望しない（画面が終了します）")
         )
-    if fb_request == "練習用です（Feedbackを希望しない）":
+    if fb_request == "Feedbackを希望しない（画面が終了します）":
         fb_flag = "0"
     else:
         fb_flag = "1"
@@ -219,20 +228,13 @@ if submit:
     if email == '':
         st.error('メールアドレス/Mail addressを入力してください')
 
-    if answer == '':
-        st.error('回答内容を入力してください')
 
-    if (name is not '' and email is not '' and answer is not ''):
-        url = 'https://buy.stripe.com/test_14k28W8L71FH4PS28b'
-
+    if (name is not '' and email is not ''):
         st.info('回答が提出されました。入力のメールアドレスに決済URLを送付します。')
         st.error('※注意※  \n決済が完了しなければ、Feedbackは送付されません')
-        list = [id, name, email, question, answer, gcs_uri, fb_flag]
+        list = [id, name, email, question, text, gcs_uri, fb_flag]
         google_spread(list)
         gmail(email)
 
-        
-
+    
 st.stop()
-
-

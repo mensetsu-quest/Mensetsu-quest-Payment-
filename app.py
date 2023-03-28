@@ -189,7 +189,6 @@ if contents == None:
     st.info(timeout_msg)
     st.stop()
 
-st.info('【録音完了！　音声分析中...】  \n　↓分析中は録音データをチェック！')
 st.audio(contents)
 
 
@@ -198,11 +197,6 @@ bucket_name = 'tech0-speachtotext'
 destination_blob_name = 'test_' + id + '.wav'
 gcs_uri="gs://" + bucket_name + '/' +destination_blob_name
 
-upload_blob_from_memory(bucket_name, contents, destination_blob_name)
-transcript = transcript(gcs_uri)
-text = '。\n'.join(transcript)
-
-status = st.info('分析が完了しました！')
 
 with st.form("form1"):
     name = st.text_input("名前/Name")
@@ -231,9 +225,14 @@ if submit:
     if (name is not '' and email is not ''):
         st.info('回答が提出されました。入力のメールアドレスに決済URLを送付します。')
         st.error('※注意※  \n決済が完了しなければ、Feedbackは送付されません')
+        upload_blob_from_memory(bucket_name, contents, destination_blob_name)
+        transcript = transcript(gcs_uri)
+        text = '。\n'.join(transcript)
         list = [id, name, email, question, text, gcs_uri, fb_flag]
         google_spread(list)
         gmail(email)
 
     
 st.stop()
+
+

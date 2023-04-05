@@ -144,7 +144,7 @@ def gmail(email):
 
 st.title('ケース面接Quest')
 st.write("ケース面接の練習ができるアプリです。")
-st.text("① 設問番号を選ぶと設問文が表示されます  \n② 5分間の検討時間の後、回答（音声録音）に移行します  \n③ 回答（音声）は文字起こしされます。誤字を修正して提出してください  \n④ 数日後、現役コンサルタントのFeedbackをメールに送付します！！")
+st.text("① 設問番号して「検討を開始する」ボタンを押してください  \n② 5分間の検討時間の後、回答（音声録音）に移行します  \n③ Feedbackを希望する場合、お名前とメールアドレスをご入力の上、「本提出」を選択してください。  \n④ 数日後、現役コンサルタントのFeedbackをメールに送付します！！")
 
 if "state" not in st.session_state:
    st.session_state["state"] = 0
@@ -223,14 +223,22 @@ if submit:
 
 
     if (name is not '' and email is not ''):
-        st.info('回答が提出されました。入力のメールアドレスに決済URLを送付します。')
-        st.error('※注意※  \n決済が完了しなければ、Feedbackは送付されません')
+        
+        if fb_flag = "0":
+            st.info('以上で終了です。')
+            
+        if fb_flag = "1":
+            st.info('回答が提出されました。入力のメールアドレスに決済URLを送付します。')
+            st.error('※注意※  \n決済が完了しなければ、Feedbackは送付されません')
+            gmail(email)
+        
         upload_blob_from_memory(bucket_name, contents, destination_blob_name)
         transcript = transcript(gcs_uri)
         text = '。\n'.join(transcript)
         list = [id, name, email, question, text, gcs_uri, fb_flag]
         google_spread(list)
         gmail(email)
+
 
     
 st.stop()

@@ -226,18 +226,25 @@ if submit:
         
         if fb_flag == "0":
             st.info('以上で終了です。')
+            upload_blob_from_memory(bucket_name, contents, destination_blob_name)
+            transcript = transcript(gcs_uri)
+            text = '。\n'.join(transcript)
+            list = [id, name, email, question, text, gcs_uri, fb_flag]
+            google_spread(list)
+            gmail(email)
             
         if fb_flag == "1":
             st.info('回答が提出されました。入力のメールアドレスに決済URLを送付します。')
             st.error('※注意※  \n決済が完了しなければ、Feedbackは送付されません')
+            upload_blob_from_memory(bucket_name, contents, destination_blob_name)
+            transcript = transcript(gcs_uri)
+            text = '。\n'.join(transcript)
+            list = [id, name, email, question, text, gcs_uri, fb_flag]
+            google_spread(list)
             gmail(email)
+
         
-        upload_blob_from_memory(bucket_name, contents, destination_blob_name)
-        transcript = transcript(gcs_uri)
-        text = '。\n'.join(transcript)
-        list = [id, name, email, question, text, gcs_uri, fb_flag]
-        google_spread(list)
-        gmail(email)
+
 
 
     

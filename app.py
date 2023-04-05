@@ -224,10 +224,10 @@ if submit:
 
     if (name is not '' and email is not ''):
         
-        if fb_flag = "0":
+        if fb_flag == "0":
             st.info('以上で終了です。')
             
-        if fb_flag = "1":
+        if fb_flag == "1":
             st.info('回答が提出されました。入力のメールアドレスに決済URLを送付します。')
             st.error('※注意※  \n決済が完了しなければ、Feedbackは送付されません')
             gmail(email)
